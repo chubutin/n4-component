@@ -26,10 +26,8 @@ public class MapperURITransform {
 		Properties prop = new Properties();
 		InputStream input = null;
 		try {
-
 			input = new FileInputStream(mapPropertiesURI);
 			prop.load(input);
-
 		} catch (FileNotFoundException e) {
 			LOG.error(MessageFormat.format(
 					"No se encontró el archivo de propiedades en la URI: {0}",
@@ -77,7 +75,7 @@ public class MapperURITransform {
 									body.size()));
 		}
 		for (int i = 0; i < body.size(); i++) {
-			if (mapUri.get(i) == null) {
+			if (mapUri.get(String.valueOf(i)) == null) {
 				throw new RuntimeCamelException(MessageFormat.format(
 						"No se encontró el item de la posicion {0} en el mapa",
 						i));
@@ -90,9 +88,11 @@ public class MapperURITransform {
 			List<String> body) {
 		StringBuffer returnString = new StringBuffer();
 		for (int i = 0; i < body.size(); i++) {
-			returnString.append(mapUri.get(i)).append("=").append(body.get(i));
+			returnString.append(mapUri.get(String.valueOf(i))).append("=").append(body.get(i)).append("&");
 		}
-		return returnString.toString();
+		//remuevo el ultimo &
+		String string = returnString.toString();
+		return string.substring(0,string.length()-1);
 	}
 
 }
