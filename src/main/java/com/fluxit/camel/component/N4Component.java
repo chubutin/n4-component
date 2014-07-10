@@ -18,8 +18,11 @@ package com.fluxit.camel.component;
 
 import java.util.Map;
 
+import javax.swing.DefaultComboBoxModel;
+
 import org.apache.camel.CamelContext;
 import org.apache.camel.Endpoint;
+import org.apache.camel.impl.DefaultComponent;
 import org.apache.camel.impl.UriEndpointComponent;
 
 /**
@@ -28,17 +31,15 @@ import org.apache.camel.impl.UriEndpointComponent;
  * @author chubutin
  * 
  */
-public class N4Component extends UriEndpointComponent {
-
-	public N4Component(CamelContext context,
-			Class<? extends Endpoint> endpointClass) {
-		super(context, endpointClass);
-		// TODO Auto-generated constructor stub
-	}
-
-	protected Endpoint createEndpoint(String uri, String remaining, Map<String, Object> parameters) throws Exception {
+public class N4Component extends DefaultComponent {
+	
+	private Class<? extends Endpoint> endpointClass;
+	
+	
+    protected Endpoint createEndpoint(String uri, String remaining, Map<String, Object> parameters) throws Exception {
         Endpoint endpoint = new N4Endpoint(uri, this);
         setProperties(endpoint, parameters);
         return endpoint;
     }
+
 }

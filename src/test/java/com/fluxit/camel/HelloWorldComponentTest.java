@@ -44,7 +44,7 @@ public class HelloWorldComponentTest extends CamelTestSupport {
         return new RouteBuilder() {
             public void configure() {
                 from("direct:startProcess")
-                  .to("n4://bar")
+                  .to("n4:holaMundo")
                   .to("mock:result");
             }
         };
