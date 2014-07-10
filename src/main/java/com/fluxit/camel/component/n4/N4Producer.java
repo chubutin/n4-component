@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.fluxit.camel.component;
+package com.fluxit.camel.component.n4;
 
 import java.text.MessageFormat;
 
@@ -38,6 +38,7 @@ public class N4Producer extends DefaultProducer {
         super(endpoint);
         this.endpoint = endpoint;
         LOG.debug(MessageFormat.format("Productor N4 creado con el endpoint {0}", this.endpoint));
+        LOG.debug(MessageFormat.format("El tipo de invocacion a n4 será {0}", this.endpoint.getProviderType()));
     }
 
     public void process(Exchange exchange) throws Exception {

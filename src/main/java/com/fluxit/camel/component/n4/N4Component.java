@@ -14,16 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.fluxit.camel.component;
+package com.fluxit.camel.component.n4;
 
+import java.text.MessageFormat;
 import java.util.Map;
 
-import javax.swing.DefaultComboBoxModel;
-
-import org.apache.camel.CamelContext;
 import org.apache.camel.Endpoint;
 import org.apache.camel.impl.DefaultComponent;
-import org.apache.camel.impl.UriEndpointComponent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents the component that manages {@link N4Endpoint}.
@@ -32,14 +31,18 @@ import org.apache.camel.impl.UriEndpointComponent;
  * 
  */
 public class N4Component extends DefaultComponent {
-	
-	private Class<? extends Endpoint> endpointClass;
-	
-	
-    protected Endpoint createEndpoint(String uri, String remaining, Map<String, Object> parameters) throws Exception {
-        Endpoint endpoint = new N4Endpoint(uri, this);
-        setProperties(endpoint, parameters);
-        return endpoint;
-    }
 
+	private static final transient Logger LOG = LoggerFactory
+			.getLogger(N4Component.class);
+
+	protected Endpoint createEndpoint(String uri, String remaining,
+			Map<String, Object> parameters) throws Exception {
+		
+		Endpoint endpoint = new N4Endpoint(uri, this);
+		LOG.debug(MessageFormat
+				.format("Creando el endpoint de la clase {0} con la URI {1} y los parametros {2} ",
+						endpoint.getClass(), uri, parameters));
+		setProperties(endpoint, parameters);
+		return endpoint;
+	}
 }

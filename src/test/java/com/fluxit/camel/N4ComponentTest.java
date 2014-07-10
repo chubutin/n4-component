@@ -23,7 +23,7 @@ import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.junit.Test;
 
-public class HelloWorldComponentTest extends CamelTestSupport {
+public class N4ComponentTest extends CamelTestSupport {
 	
 	@Produce(uri="direct:startProcess")
 	ProducerTemplate template;
@@ -32,7 +32,6 @@ public class HelloWorldComponentTest extends CamelTestSupport {
     public void testHelloWorld() throws Exception {
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMinimumMessageCount(1);
-        
          
         template.sendBody("Hola mundo!");
         
@@ -44,7 +43,7 @@ public class HelloWorldComponentTest extends CamelTestSupport {
         return new RouteBuilder() {
             public void configure() {
                 from("direct:startProcess")
-                  .to("n4:holaMundo")
+                  .to("n4:holaMundo?n4EndpointURI=http://localhost:9090/rest&classSerialization=asdasdas")
                   .to("mock:result");
             }
         };
