@@ -16,11 +16,12 @@
  */
 package com.fluxit.camel.component.n4;
 
-import java.text.MessageFormat;
 import java.util.Map;
 
 import org.apache.camel.Endpoint;
 import org.apache.camel.impl.DefaultComponent;
+import org.apache.camel.util.ObjectHelper;
+import org.apache.commons.validator.routines.UrlValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,17 +33,31 @@ import org.slf4j.LoggerFactory;
  */
 public class N4Component extends DefaultComponent {
 
-	private static final transient Logger LOG = LoggerFactory
-			.getLogger(N4Component.class);
+	private static final transient Logger LOG = LoggerFactory.getLogger(N4Component.class);
 
-	protected Endpoint createEndpoint(String uri, String remaining,
-			Map<String, Object> parameters) throws Exception {
-		
-		Endpoint endpoint = new N4Endpoint(uri, this);
-		LOG.debug(MessageFormat
-				.format("Creando el endpoint de la clase {0} con la URI {1} y los parametros {2} ",
-						endpoint.getClass(), uri, parameters));
+	protected Endpoint createEndpoint(String uri, String remaining, Map<String, Object> parameters)
+			throws Exception {
+
+		N4Endpoint endpoint = new N4Endpoint(uri, this);
+		LOG.debug("Creando el endpoint de la clase {0} con la URI {1} y los parametros {2} ",
+				endpoint.getClass(), uri, parameters);
 		setProperties(endpoint, parameters);
+		
+		validateRequiredProperties(endpoint);
+		
 		return endpoint;
+	}
+
+	private void validateRequiredProperties(N4Endpoint endpoint) throws Exception {
+		
+		if(ObjectHelper.isEmpty(endpoint.getN4EndpointURI())){
+			throw new IllegalArgumentException("La propiedad n4EndpointURI no puede ser nula");
+		}else{
+			UrlValidator urlValidator = new UrlValidator(UrlValidator.ALLOW_LOCAL_URLS);
+			if(!urlValidator.isValid(endpoint.getN4EndpointURI())){
+				throw new IllegalArgumentException("La URL del provider no es valida, corregir la propiedad n4EndpointURI");
+			}
+		}
+		
 	}
 }

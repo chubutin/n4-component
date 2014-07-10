@@ -16,36 +16,48 @@
  */
 package com.fluxit.camel;
 
+import java.text.MessageFormat;
+
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.impl.DefaultComponent;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.junit.Test;
 
-public class N4ComponentTest extends CamelTestSupport {
-	
-	@Produce(uri="direct:startProcess")
-	ProducerTemplate template;
-	
-    @Test
-    public void testHelloWorld() throws Exception {
-        MockEndpoint mock = getMockEndpoint("mock:result");
-        mock.expectedMinimumMessageCount(1);
-         
-        template.sendBody("Hola mundo!");
-        
-        assertMockEndpointsSatisfied();
-    }
+import com.fluxit.camel.component.n4.N4Endpoint;
 
-    @Override
-    protected RouteBuilder createRouteBuilder() throws Exception {
-        return new RouteBuilder() {
-            public void configure() {
-                from("direct:startProcess")
-                  .to("n4:holaMundo?n4EndpointURI=http://localhost:9090/rest&classSerialization=asdasdas")
-                  .to("mock:result");
-            }
-        };
-    }
+public class N4ComponentTest extends CamelTestSupport {
+
+	private String FILTER_PROVIDER = N4Endpoint.FILTER_PROVIDER;
+	private String HTTP_URI = "http://localhost:8080/rest";
+	private String CLASS_SERIALIZATION = DefaultComponent.class.getName();
+
+	@Produce(uri = "direct:startProcess")
+	ProducerTemplate template;
+
+	@Test
+	public void testHelloWorld() throws Exception {
+		MockEndpoint mock = getMockEndpoint("mock:result");
+		mock.expectedMinimumMessageCount(1);
+
+		template.sendBody("Hola mundo!");
+
+		assertMockEndpointsSatisfied();
+	}
+
+	@Override
+	protected RouteBuilder createRouteBuilder() throws Exception {
+		return new RouteBuilder() {
+
+			public void configure() {
+				from("direct:startProcess")
+				.to(MessageFormat
+					.format("n4:holaMundo?n4EndpointURI={0}&classSerialization={1}&providerType={2}",
+							HTTP_URI, CLASS_SERIALIZATION, FILTER_PROVIDER))
+				.to("mock:result");
+			}
+		};
+	}
 }

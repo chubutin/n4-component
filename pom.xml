@@ -33,6 +33,7 @@
 
 	<properties>
 		<camel.version>2.12.0.redhat-610379</camel.version>
+		<commons-validator.version>1.4.0</commons-validator.version>
 	</properties>
 
 	<dependencies>
@@ -46,6 +47,12 @@
 			<artifactId>camel-http</artifactId>
 			<version>${camel.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>commons-validator</groupId>
+			<artifactId>commons-validator</artifactId>
+			<version>${commons-validator.version}</version>
+		</dependency>
+
 
 		<!-- for testing -->
 		<dependency>

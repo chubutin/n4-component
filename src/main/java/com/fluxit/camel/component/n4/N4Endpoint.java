@@ -36,8 +36,8 @@ import com.fluxit.camel.component.n4.exception.InvalidParameterException;
 @UriEndpoint(scheme = "n4")
 public class N4Endpoint extends DefaultEndpoint {
 
-	public final String FILTER_PROVIDER = "FILTER_PROVIDER";
-	public final String GENERIC_WS_PROVIDER = "WS_PROVIDER";
+	public static final String FILTER_PROVIDER = "FILTER_PROVIDER";
+	public static final String GENERIC_WS_PROVIDER = "WS_PROVIDER";
 
 	@UriParam
 	private String n4EndpointURI;
@@ -93,7 +93,7 @@ public class N4Endpoint extends DefaultEndpoint {
 	public void setProviderType(String providerType) {
 		if (providerType.equalsIgnoreCase(FILTER_PROVIDER)
 				|| providerType.equalsIgnoreCase(GENERIC_WS_PROVIDER)) {
-			this.providerType = providerType;
+			this.providerType = providerType.toUpperCase();
 		} else {
 			throw new InvalidParameterException("providerType", providerType);
 		}

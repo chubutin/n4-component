@@ -16,8 +16,6 @@
  */
 package com.fluxit.camel.component.n4;
 
-import java.text.MessageFormat;
-
 import org.apache.camel.Exchange;
 import org.apache.camel.impl.DefaultProducer;
 import org.slf4j.Logger;
@@ -26,25 +24,32 @@ import org.slf4j.LoggerFactory;
 /**
  * 
  * @author chubutin
- *
+ * 
  */
 public class N4Producer extends DefaultProducer {
-	
-    private static final transient Logger LOG = LoggerFactory.getLogger(N4Producer.class);
-    
-    private N4Endpoint endpoint;
 
-    public N4Producer(N4Endpoint endpoint) {
-        super(endpoint);
-        this.endpoint = endpoint;
-        LOG.debug(MessageFormat.format("Productor N4 creado con el endpoint {0}", this.endpoint));
-        LOG.debug(MessageFormat.format("El tipo de invocacion a n4 será {0}", this.endpoint.getProviderType()));
-    }
+	private static final transient Logger LOG = LoggerFactory.getLogger(N4Producer.class);
 
-    public void process(Exchange exchange) throws Exception {
-        LOG.debug(MessageFormat.format("Exchange en N4 Producer: {0}", exchange.getIn().getBody()));
-        
-        	
-    }
+	private N4Endpoint endpoint;
+
+	public N4Producer(N4Endpoint endpoint) {
+		super(endpoint);
+		this.endpoint = endpoint;
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Productor N4 creado con el endpoint {0}", this.endpoint);
+			LOG.debug("El tipo de invocacion a n4 será {0}", this.endpoint.getProviderType());
+			if (endpoint.getClassSerialization() != null) {
+				LOG.debug("Se serializará a la clase {0}", this.endpoint.getClassSerialization());
+			} else {
+				LOG.debug("No se serializará a ninguna clase luego de la transformación");
+			}
+
+		}
+	}
+
+	public void process(Exchange exchange) throws Exception {
+		LOG.debug("Exchange en N4 Producer: {0}", exchange.getIn().getBody());
+
+	}
 
 }
