@@ -16,7 +16,6 @@
  */
 package com.fluxit.camel.component;
 
-import org.apache.camel.CamelExecutionException;
 import org.apache.camel.Consumer;
 import org.apache.camel.FailedToCreateConsumerException;
 import org.apache.camel.Processor;
@@ -27,7 +26,9 @@ import org.apache.camel.spi.UriEndpoint;
 import org.apache.camel.spi.UriParam;
 
 /**
- * Represents a HelloWorld endpoint.
+ * Representa un endpoint para la utilizacion de N4 dentro de Camel
+ * 
+ * @author chubutin
  */
 @ManagedResource(description = "Managed N4Endpoint")
 @UriEndpoint(scheme = "n4")

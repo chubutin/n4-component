@@ -3,27 +3,31 @@ package com.fluxit.camel.transformer;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.camel.RuntimeCamelException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 
 public class MapperURITest {
-
-	private static final transient Logger log = LoggerFactory
-			.getLogger(MapperURITest.class);
 
 	private String mapPropertiesURI = "src/test/resources/files/mapParameter/URI/mapParameter.properties";
 	private String mapPropertiesURIFail = "src/test/resources/files/mapParameter/URI/mapParameterFail.txt";
 	private String mapPropertiesURINotFound = "src/test/resources/files/mapParameter/URI/mapParameterX.properties";
+	private String mapPropertiesFromDOM = "src/test/resources/files/mapParameter/URI/mapParameterWithName.properties";
+	private String mapPropertiesFromDOMFail = "src/test/resources/files/mapParameter/URI/mapParameterXMLFail.properties";
+
+	private String inputXML = "src/test/resources/files/mapParameter/INPUT/request.xml";
+
+	MapperURITransformForFilter transformer = new MapperURITransformForFilter();
 
 	@Before
 	public void setUp() throws Exception {
@@ -31,8 +35,6 @@ public class MapperURITest {
 
 	@Test(expected = FileNotFoundException.class)
 	public void testFailCatchFileNotFound() throws Throwable {
-
-		MapperURITransform transformer = new MapperURITransform();
 		List<String> body = new ArrayList<String>();
 		try {
 			transformer.transformURI(mapPropertiesURINotFound, body);
@@ -46,8 +48,6 @@ public class MapperURITest {
 	@Ignore(value = "Se ignora porque no se puede capturar una IO exception")
 	public void testFailCatchIOException() throws Throwable {
 
-		writeInFile();
-		MapperURITransform transformer = new MapperURITransform();
 		List<String> body = new ArrayList<String>();
 		try {
 			transformer.transformURI(mapPropertiesURIFail, body);
@@ -59,7 +59,6 @@ public class MapperURITest {
 	@Test
 	public void testFailDifferentsSize() throws Throwable {
 
-		MapperURITransform transformer = new MapperURITransform();
 		List<String> body = new ArrayList<String>();
 		body.add("Parametro1");
 		body.add("Parametro2");
@@ -78,9 +77,8 @@ public class MapperURITest {
 	}
 
 	@Test
-	public void testMap() throws Throwable {
+	public void testMapList() throws Throwable {
 
-		MapperURITransform transformer = new MapperURITransform();
 		List<String> body = new ArrayList<String>();
 		body.add("Parametro1");
 		body.add("Parametro2");
@@ -89,30 +87,62 @@ public class MapperURITest {
 		try {
 			String transformURI = transformer.transformURI(mapPropertiesURI,
 					body);
-			Assert.assertEquals(
-					"El mensaje de respuesta es nulo",
-					transformURI,
-					"PARM_PARAMETRO_1=Parametro1&PARM_PARAMETRO_2=Parametro2&PARM_PARAMETRO_3=Parametro3");
+			Assert.assertTrue(
+					"El mensaje de respuesta no está correctamente formado",
+					transformURI.contains("PARM_PARAMETRO_1=Parametro1"));
+			Assert.assertTrue(transformURI
+					.contains("PARM_PARAMETRO_2=Parametro2"));
+			Assert.assertTrue(transformURI
+					.contains("PARM_PARAMETRO_3=Parametro3"));
 		} catch (RuntimeCamelException e) {
 			Assert.fail(e.getMessage());
 		}
-
 	}
 
-	private void writeInFile() throws FileNotFoundException,
-			UnsupportedEncodingException {
-		PrintWriter out1 = new PrintWriter(new File(mapPropertiesURIFail),
-				"ISO8859_1");
-		char c = 0x000A;
-		out1.append(c);
-		out1.close();
+	@Test
+	public void testMapXML() throws Throwable {
+
+		File fXmlFile = new File(inputXML);
+		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+		Document doc = dBuilder.parse(fXmlFile);
+
+		// optional, but recommended
+		// read this -
+		// http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
+		doc.getDocumentElement().normalize();
+
+		try {
+			String transformURI = transformer.transformURI(
+					mapPropertiesFromDOM, doc);
+			Assert.assertTrue(
+					"El mensaje de respuesta no está correctamente formado",
+					transformURI.contains("PARM_NOMBRE=Ramiro"));
+			Assert.assertTrue(transformURI.contains("PARM_APELLIDO=Pugh"));
+			Assert.assertTrue(transformURI.contains("PARM_CUIT=201234567890"));
+		} catch (RuntimeCamelException e) {
+			Assert.fail(e.getMessage());
+		}
 	}
 
-	public void test() {
-		MapperURITransform transformer = new MapperURITransform();
-		List<String> body = new ArrayList<String>();
-		transformer.transformURI(mapPropertiesURI, body);
+	@Test(expected = XPathExpressionException.class)
+	public void testFailMapXML() throws Throwable {
 
+		File fXmlFile = new File(inputXML);
+		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+		Document doc = dBuilder.parse(fXmlFile);
+
+		// optional, but recommended
+		// read this -
+		// http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
+		doc.getDocumentElement().normalize();
+
+		try {
+			transformer.transformURI(mapPropertiesFromDOMFail, doc);
+		} catch (RuntimeCamelException e) {
+			throw e.getCause();
+		}
 	}
 
 }

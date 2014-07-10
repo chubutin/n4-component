@@ -24,6 +24,9 @@ import org.apache.camel.impl.UriEndpointComponent;
 
 /**
  * Represents the component that manages {@link N4Endpoint}.
+ * 
+ * @author chubutin
+ * 
  */
 public class N4Component extends UriEndpointComponent {
 
