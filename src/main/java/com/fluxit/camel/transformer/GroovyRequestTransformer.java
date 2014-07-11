@@ -1,7 +1,14 @@
 package com.fluxit.camel.transformer;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringWriter;
+import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -13,6 +20,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.camel.RuntimeCamelException;
+import org.apache.commons.validator.routines.UrlValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -38,7 +46,8 @@ import org.w3c.dom.Element;
  */
 public class GroovyRequestTransformer {
 
-	private static final Logger LOG = LoggerFactory.getLogger(GroovyRequestTransformer.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(GroovyRequestTransformer.class);
 
 	private final String rootElementName = "groovy";
 	private String classLocation;
@@ -48,6 +57,43 @@ public class GroovyRequestTransformer {
 	// del parámetro en el request
 	private Map<String, String> mapValues;
 
+	public GroovyRequestTransformer() {
+	}
+
+	public GroovyRequestTransformer(String mapPropertiesURI,
+			String classLocation, String rootElementName, String className) {
+		super();
+		LOG.debug(
+				"Creando el transformer con rootElement {0}, classLocation {1}, className {2} y las properties en la URI {3} ",
+				rootElementName, classLocation, className, mapPropertiesURI);
+
+		loadMapFromProperties(mapPropertiesURI);
+
+	}
+
+	private void loadMapFromProperties(String mapPropertiesURI) {
+		Properties prop = new Properties();
+		InputStream input = null;
+		try {
+			input = new FileInputStream(mapPropertiesURI);
+			prop.load(input);
+		} catch (FileNotFoundException e) {
+			LOG.error(MessageFormat.format(
+					"No se encontró el archivo de propiedades en la URI: {0}",
+					mapPropertiesURI), e);
+			throw new RuntimeCamelException(e);
+		} catch (IOException e) {
+			LOG.error(
+					MessageFormat
+							.format("I/O exception en el archivo de propiedades en la URI: {0}",
+									mapPropertiesURI), e);
+			throw new RuntimeCamelException(e);
+		}
+
+		this.mapValues = new HashMap<String, String>((Map) prop);
+		LOG.debug("Las propiedades del transformer son {0}", mapValues);
+	}
+
 	/**
 	 * Retorna el XML a enviar a N4 a través de su Interface Groovy
 	 * 
@@ -56,7 +102,8 @@ public class GroovyRequestTransformer {
 	public String transform() {
 
 		try {
-			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilderFactory docFactory = DocumentBuilderFactory
+					.newInstance();
 			DocumentBuilder docBuilder;
 
 			docBuilder = docFactory.newDocumentBuilder();
@@ -102,9 +149,12 @@ public class GroovyRequestTransformer {
 			String output = writer.getBuffer().toString();
 			return output;
 		} catch (TransformerException e) {
-			LOG.error("Error en la transformacion del documento de parametros a String", e);
+			LOG.error(
+					"Error en la transformacion del documento de parametros a String",
+					e);
 			throw new RuntimeCamelException(
-					"Error en la transformacion del documento de parametros a String", e);
+					"Error en la transformacion del documento de parametros a String",
+					e);
 		}
 	}
 

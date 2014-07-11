@@ -16,16 +16,20 @@
  */
 package com.fluxit.camel.component.n4;
 
+import javax.xml.transform.Transformer;
+
 import org.apache.camel.Consumer;
 import org.apache.camel.FailedToCreateConsumerException;
 import org.apache.camel.Processor;
 import org.apache.camel.Producer;
 import org.apache.camel.api.management.ManagedResource;
+import org.apache.camel.builder.xml.XsltBuilder;
 import org.apache.camel.impl.DefaultEndpoint;
 import org.apache.camel.spi.UriEndpoint;
 import org.apache.camel.spi.UriParam;
 
 import com.fluxit.camel.component.n4.exception.InvalidParameterException;
+import com.fluxit.camel.transformer.GroovyRequestTransformer;
 
 /**
  * Representa un endpoint para la utilizacion de N4 dentro de Camel
@@ -38,18 +42,34 @@ public class N4Endpoint extends DefaultEndpoint {
 
 	public static final String FILTER_PROVIDER = "FILTER_PROVIDER";
 	public static final String GENERIC_WS_PROVIDER = "WS_PROVIDER";
+	
+	private Transformer transformerForInput;
+	private Transformer transformerForOutput;
 
 	@UriParam
-	private String n4EndpointURI;
+	protected String n4EndpointURI;
 
 	@UriParam
-	private String classSerialization;
+	protected String classSerialization;
+
+	@UriParam
+	protected GroovyRequestTransformer groovyRequestBean;
+	
+	@UriParam
+	protected String uriXSLTInput;
+	
+	@UriParam
+	protected String uriMapInput;
+	
+	@UriParam
+	protected String uriXSLTOutput;
 
 	@UriParam
 	// tipo de invocacion a n4. Por defecto se invocara a un filtro
-	private String providerType = FILTER_PROVIDER;
+	protected String providerType = FILTER_PROVIDER;
 
 	public N4Endpoint() {
+		super();
 	}
 
 	public N4Endpoint(String uri, N4Component component) {
@@ -62,7 +82,7 @@ public class N4Endpoint extends DefaultEndpoint {
 
 	public Consumer createConsumer(Processor processor) throws Exception {
 		throw new FailedToCreateConsumerException(
-				"No se pueden crear endpoints consumidores de N4 con la URI",
+				"No se pueden crear endpoints consumidores de N4",
 				null);
 	}
 
@@ -97,6 +117,54 @@ public class N4Endpoint extends DefaultEndpoint {
 		} else {
 			throw new InvalidParameterException("providerType", providerType);
 		}
+	}
+
+	public GroovyRequestTransformer getGroovyRequestBean() {
+		return groovyRequestBean;
+	}
+
+	public void setGroovyRequestBean(GroovyRequestTransformer groovyRequestBean) {
+		this.groovyRequestBean = groovyRequestBean;
+	}
+
+	public String getUriXSLTInput() {
+		return uriXSLTInput;
+	}
+
+	public void setUriXSLTInput(String uriXSLTInput) {
+		this.uriXSLTInput = uriXSLTInput;
+	}
+
+	public String getUriXSLTOutput() {
+		return uriXSLTOutput;
+	}
+
+	public void setUriXSLTOutput(String uriXSLTOutput) {
+		this.uriXSLTOutput = uriXSLTOutput;
+	}
+
+	public String getUriMapInput() {
+		return uriMapInput;
+	}
+
+	public void setUriMapInput(String uriMapInput) {
+		this.uriMapInput = uriMapInput;
+	}
+
+	public Transformer getTransformerForInput() {
+		return transformerForInput;
+	}
+
+	public void setTransformerForInput(Transformer transformerForInput) {
+		this.transformerForInput = transformerForInput;
+	}
+
+	public Transformer getTransformerForOutput() {
+		return transformerForOutput;
+	}
+
+	public void setTransformerForOutput(Transformer transformerForOutput) {
+		this.transformerForOutput = transformerForOutput;
 	}
 
 }

@@ -18,11 +18,18 @@ package com.fluxit.camel;
 
 import java.text.MessageFormat;
 
+import javax.xml.transform.TransformerException;
+
+import junit.framework.Assert;
+
+import org.apache.camel.Consumer;
+import org.apache.camel.FailedToCreateRouteException;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.impl.DefaultComponent;
+import org.apache.camel.impl.DefaultProducerTemplate;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.junit.Test;
 
@@ -33,6 +40,9 @@ public class N4ComponentTest extends CamelTestSupport {
 	private String FILTER_PROVIDER = N4Endpoint.FILTER_PROVIDER;
 	private String HTTP_URI = "http://localhost:8080/rest";
 	private String CLASS_SERIALIZATION = DefaultComponent.class.getName();
+	private String INPUT_MAP = "files/mapParameter/URI/mapParameter.properties";
+	private String INPUT_TRANSFORMATION = "files/xslt/INPUT/inputTransformation.xsl";
+	private String INPUT_TRANSFORMATION_FAIL = "files/xslt/INPUT/inputTransformationFAIL.xsl";
 
 	@Produce(uri = "direct:startProcess")
 	ProducerTemplate template;
@@ -47,16 +57,65 @@ public class N4ComponentTest extends CamelTestSupport {
 		assertMockEndpointsSatisfied();
 	}
 
+	@Test(expected = FailedToCreateRouteException.class)
+	public void testFailMultipleInputs() throws Exception {
+
+		context.addRoutes(new RouteBuilder(context) {
+
+			@Override
+			public void configure() throws Exception {
+				from("direct:testFailMultipleInputs")
+						.to(MessageFormat
+								.format("n4:holaMundo?n4EndpointURI={0}&classSerialization={1}&providerType={2}&uriMapInput={3}&uriXSLTInput={4}",
+										HTTP_URI, CLASS_SERIALIZATION,
+										FILTER_PROVIDER, INPUT_MAP,
+										INPUT_TRANSFORMATION));
+			}
+		});
+	}
+
+	@Test(expected = TransformerException.class)
+	public void testFailXsltNotFound() throws Throwable {
+
+		final String uri = "direct:testFailXsltNotFound";
+		context.addRoutes(new RouteBuilder(context) {
+			@Override
+			public void configure() throws Exception {
+				from(uri)
+						.routeId("FailXsltNotFound")
+						.to(MessageFormat
+								.format("n4:holaMundo?n4EndpointURI={0}&classSerialization={1}&providerType={2}&uriXSLTInput={5}",
+										HTTP_URI, CLASS_SERIALIZATION,
+										FILTER_PROVIDER, INPUT_MAP,
+										INPUT_TRANSFORMATION_FAIL))
+						.to("mock:result");
+			}
+		});
+
+		try {
+			DefaultProducerTemplate template = DefaultProducerTemplate
+					.newInstance(context, uri);
+			template.start();
+			template.sendBody("Hola mundo!");
+
+		} catch (Exception e) {
+			throw e.getCause();
+		}
+
+	}
+
 	@Override
 	protected RouteBuilder createRouteBuilder() throws Exception {
 		return new RouteBuilder() {
 
 			public void configure() {
 				from("direct:startProcess")
-				.to(MessageFormat
-					.format("n4:holaMundo?n4EndpointURI={0}&classSerialization={1}&providerType={2}",
-							HTTP_URI, CLASS_SERIALIZATION, FILTER_PROVIDER))
-				.to("mock:result");
+						.to(MessageFormat
+								.format("n4:holaMundo?n4EndpointURI={0}&classSerialization={1}&providerType={2}&uriXSLTInput={4}",
+										HTTP_URI, CLASS_SERIALIZATION,
+										FILTER_PROVIDER, INPUT_MAP,
+										INPUT_TRANSFORMATION))
+						.to("mock:result");
 			}
 		};
 	}
