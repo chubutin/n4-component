@@ -16,6 +16,7 @@
  */
 package com.fluxit.camel.component.n4;
 
+import javax.xml.bind.JAXBContext;
 import javax.xml.transform.Transformer;
 
 import org.apache.camel.Consumer;
@@ -23,7 +24,6 @@ import org.apache.camel.FailedToCreateConsumerException;
 import org.apache.camel.Processor;
 import org.apache.camel.Producer;
 import org.apache.camel.api.management.ManagedResource;
-import org.apache.camel.builder.xml.XsltBuilder;
 import org.apache.camel.impl.DefaultEndpoint;
 import org.apache.camel.spi.UriEndpoint;
 import org.apache.camel.spi.UriParam;
@@ -42,9 +42,10 @@ public class N4Endpoint extends DefaultEndpoint {
 
 	public static final String FILTER_PROVIDER = "FILTER_PROVIDER";
 	public static final String GENERIC_WS_PROVIDER = "WS_PROVIDER";
-	
+
 	private Transformer transformerForInput;
 	private Transformer transformerForOutput;
+	private JAXBContext jaxbContext;
 
 	@UriParam
 	protected String n4EndpointURI;
@@ -54,15 +55,24 @@ public class N4Endpoint extends DefaultEndpoint {
 
 	@UriParam
 	protected GroovyRequestTransformer groovyRequestBean;
-	
+
 	@UriParam
 	protected String uriXSLTInput;
-	
+
 	@UriParam
 	protected String uriMapInput;
-	
+
 	@UriParam
 	protected String uriXSLTOutput;
+
+	@UriParam
+	private String n4User = "n4api";
+
+	@UriParam
+	private String n4Pass = "lookitup";
+	
+	@UriParam
+	private String filterName;
 
 	@UriParam
 	// tipo de invocacion a n4. Por defecto se invocara a un filtro
@@ -82,8 +92,7 @@ public class N4Endpoint extends DefaultEndpoint {
 
 	public Consumer createConsumer(Processor processor) throws Exception {
 		throw new FailedToCreateConsumerException(
-				"No se pueden crear endpoints consumidores de N4",
-				null);
+				"No se pueden crear endpoints consumidores de N4", null);
 	}
 
 	public boolean isSingleton() {
@@ -165,6 +174,38 @@ public class N4Endpoint extends DefaultEndpoint {
 
 	public void setTransformerForOutput(Transformer transformerForOutput) {
 		this.transformerForOutput = transformerForOutput;
+	}
+
+	public String getN4User() {
+		return n4User;
+	}
+
+	public void setN4User(String n4User) {
+		this.n4User = n4User;
+	}
+
+	public String getN4Pass() {
+		return n4Pass;
+	}
+
+	public void setN4Pass(String n4Pass) {
+		this.n4Pass = n4Pass;
+	}
+
+	public JAXBContext getJaxbContext() {
+		return jaxbContext;
+	}
+
+	public void setJaxbContext(JAXBContext jaxbContext) {
+		this.jaxbContext = jaxbContext;
+	}
+
+	public String getFilterName() {
+		return filterName;
+	}
+
+	public void setFilterName(String filterName) {
+		this.filterName = filterName;
 	}
 
 }

@@ -1,9 +1,11 @@
 package com.fluxit.camel.transformer;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +18,7 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.camel.CamelContext;
 import org.apache.camel.RuntimeCamelException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,16 +46,21 @@ public class MapperURITransformForFilter {
 	 * @param mapPropertiesURI
 	 * @param body
 	 * @return
+	 * @throws Exception
 	 */
-	public String transformURI(String mapPropertiesURI, Object body) {
+	public String transformURI(String mapPropertiesURI, Object body)
+			throws Exception {
 		LOG.debug(MessageFormat
 				.format("Transformando el mapa de parametros {0} y el body {1} en el listado de argumentos para un filtro",
 						mapPropertiesURI, body));
 		Properties prop = new Properties();
 		InputStream input = null;
 		try {
-			input = new FileInputStream(mapPropertiesURI);
-			prop.load(input);
+
+			InputStream stream = Thread.currentThread().getContextClassLoader()
+					.getResourceAsStream(mapPropertiesURI);
+			prop.load(stream);
+
 		} catch (FileNotFoundException e) {
 			LOG.error(MessageFormat.format(
 					"No se encontró el archivo de propiedades en la URI: {0}",
@@ -99,7 +107,7 @@ public class MapperURITransformForFilter {
 		XPathFactory xPathfactory = XPathFactory.newInstance();
 		XPath xpath = xPathfactory.newXPath();
 
-		HashMap<String,String> map = new HashMap<String, String>();
+		HashMap<String, String> map = new HashMap<String, String>();
 
 		for (String key : mapUri.keySet()) {
 			try {
@@ -154,7 +162,8 @@ public class MapperURITransformForFilter {
 						"No se encontró el item de la posicion {0} en el mapa",
 						i));
 			}
-			map.put(mapUri.remove(String.valueOf(i)),String.valueOf(body.get(i)));
+			map.put(mapUri.remove(String.valueOf(i)),
+					String.valueOf(body.get(i)));
 		}
 		return formatParameters(map);
 	}

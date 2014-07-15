@@ -34,6 +34,10 @@
 	<properties>
 		<camel.version>2.12.0.redhat-610379</camel.version>
 		<commons-validator.version>1.4.0</commons-validator.version>
+		<commons-codec-version>1.8</commons-codec-version>
+		<httpcore4-version>4.2.4</httpcore4-version>
+		<httpclient4-version>4.2.5</httpclient4-version>
+		<httpclient-version>3.1</httpclient-version>
 	</properties>
 
 	<dependencies>
@@ -51,6 +55,23 @@
 			<groupId>commons-validator</groupId>
 			<artifactId>commons-validator</artifactId>
 			<version>${commons-validator.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-httpclient</groupId>
+			<artifactId>commons-httpclient</artifactId>
+			<version>${httpclient-version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-codec</groupId>
+					<artifactId>commons-codec</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>${commons-codec-version}</version>
 		</dependency>
 
 
@@ -77,6 +98,18 @@
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 			<version>1.2.16</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.tecplata.esb</groupId>
+			<artifactId>esb-entities</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.easymock</groupId>
+			<artifactId>easymock</artifactId>
+			<version>3.2</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

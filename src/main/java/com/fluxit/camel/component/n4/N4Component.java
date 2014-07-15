@@ -16,12 +16,9 @@
  */
 package com.fluxit.camel.component.n4;
 
-import java.io.File;
 import java.util.Map;
 
-import javax.xml.transform.Source;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamSource;
+import javax.xml.bind.JAXBContext;
 
 import org.apache.camel.Endpoint;
 import org.apache.camel.builder.xml.XsltUriResolver;
@@ -45,13 +42,26 @@ public class N4Component extends DefaultComponent {
 	protected Endpoint createEndpoint(String uri, String remaining,
 			Map<String, Object> parameters) throws Exception {
 
+		XsltUriResolver uriResolver = new XsltUriResolver(super
+				.getCamelContext().getClassResolver(), null);
+
 		N4Endpoint endpoint = new N4Endpoint(uri, this);
+		
 		LOG.debug(
 				"Creando el endpoint de la clase {0} con la URI {1} y los parametros {2} ",
 				endpoint.getClass(), uri, parameters);
 		setProperties(endpoint, parameters);
 
 		validateRequiredProperties(endpoint);
+
+		if (endpoint.getUriXSLTInput() != null) {
+			 uriResolver.resolve(endpoint.getUriXSLTInput(),
+					null);
+		}
+		if (endpoint.getUriXSLTOutput() != null) {
+			 uriResolver.resolve(endpoint.getUriXSLTOutput(),
+						null);
+		}
 
 		return endpoint;
 	}
@@ -78,11 +88,19 @@ public class N4Component extends DefaultComponent {
 			LOG.error("No se seteo ningún método de transformación de entrada");
 			throw new IllegalArgumentException(
 					"Se debe setear un método de transformacion de entrada");
+
 		} else if (endpoint.getUriMapInput() != null
 				&& endpoint.getUriXSLTInput() != null) {
 			LOG.error("Se setearon ambas transformaciones de entrada, se debe usar solo una");
 			throw new IllegalArgumentException(
 					"Solo puede existir un método de transformacion de entrada");
+		}
+
+		if (endpoint.getClassSerialization() != null) {
+			LOG.debug("Instanciando el contexto de JAXB");
+			JAXBContext jaxbContext = JAXBContext.newInstance(Class
+					.forName(endpoint.getClassSerialization()));
+			endpoint.setJaxbContext(jaxbContext);
 		}
 
 	}

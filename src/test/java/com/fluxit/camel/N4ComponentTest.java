@@ -20,15 +20,10 @@ import java.text.MessageFormat;
 
 import javax.xml.transform.TransformerException;
 
-import junit.framework.Assert;
-
-import org.apache.camel.Consumer;
 import org.apache.camel.FailedToCreateRouteException;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.mock.MockEndpoint;
-import org.apache.camel.impl.DefaultComponent;
 import org.apache.camel.impl.DefaultProducerTemplate;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.junit.Test;
@@ -38,24 +33,15 @@ import com.fluxit.camel.component.n4.N4Endpoint;
 public class N4ComponentTest extends CamelTestSupport {
 
 	private String FILTER_PROVIDER = N4Endpoint.FILTER_PROVIDER;
-	private String HTTP_URI = "http://localhost:8080/rest";
-	private String CLASS_SERIALIZATION = DefaultComponent.class.getName();
+	private String HTTP_URI = "http://192.168.16.201:10080/apex/api/query";
+	private String CLASS_SERIALIZATION = Integer.class.getName();
 	private String INPUT_MAP = "files/mapParameter/URI/mapParameter.properties";
 	private String INPUT_TRANSFORMATION = "files/xslt/INPUT/inputTransformation.xsl";
+	private String OUTPUT_TRANSFORMATION = "files/xslt/INPUT/inputTransformation.xsl";
 	private String INPUT_TRANSFORMATION_FAIL = "files/xslt/INPUT/inputTransformationFAIL.xsl";
 
 	@Produce(uri = "direct:startProcess")
 	ProducerTemplate template;
-
-	@Test
-	public void testHelloWorld() throws Exception {
-		MockEndpoint mock = getMockEndpoint("mock:result");
-		mock.expectedMinimumMessageCount(1);
-
-		template.sendBody("Hola mundo!");
-
-		assertMockEndpointsSatisfied();
-	}
 
 	@Test(expected = FailedToCreateRouteException.class)
 	public void testFailMultipleInputs() throws Exception {
@@ -76,6 +62,8 @@ public class N4ComponentTest extends CamelTestSupport {
 
 	@Test(expected = TransformerException.class)
 	public void testFailXsltNotFound() throws Throwable {
+		
+		try {
 
 		final String uri = "direct:testFailXsltNotFound";
 		context.addRoutes(new RouteBuilder(context) {
@@ -92,31 +80,16 @@ public class N4ComponentTest extends CamelTestSupport {
 			}
 		});
 
-		try {
+		
 			DefaultProducerTemplate template = DefaultProducerTemplate
 					.newInstance(context, uri);
 			template.start();
 			template.sendBody("Hola mundo!");
 
 		} catch (Exception e) {
-			throw e.getCause();
+			throw e.getCause().getCause();
 		}
 
 	}
 
-	@Override
-	protected RouteBuilder createRouteBuilder() throws Exception {
-		return new RouteBuilder() {
-
-			public void configure() {
-				from("direct:startProcess")
-						.to(MessageFormat
-								.format("n4:holaMundo?n4EndpointURI={0}&classSerialization={1}&providerType={2}&uriXSLTInput={4}",
-										HTTP_URI, CLASS_SERIALIZATION,
-										FILTER_PROVIDER, INPUT_MAP,
-										INPUT_TRANSFORMATION))
-						.to("mock:result");
-			}
-		};
-	}
 }
